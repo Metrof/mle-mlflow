@@ -6,9 +6,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# определяем основные credentials, которые нужны для подключения к MLflow
-# важно, что credentials мы передаём для себя как пользователей Tracking Service
-# у вас должен быть доступ к бакету, в который вы будете складывать артефакты
 os.environ["MLFLOW_S3_ENDPOINT_URL"] = "https://storage.yandexcloud.net" #endpoint бакета от YandexCloud
 os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("AWS_ACCESS_KEY_ID") # получаем id ключа бакета, к которому подключён MLFlow, из .env
 os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY") # получаем ключ бакета, к которому подключён MLFlow, из .env
