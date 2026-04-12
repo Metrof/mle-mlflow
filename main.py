@@ -8,6 +8,8 @@ from sklearn.metrics import (
 )
 import mlflow
 from mlflow.models import infer_signature
+from mlflow.tracking import MlflowClient
+from datetime import datetime
 
 from dotenv import load_dotenv
 
@@ -17,7 +19,7 @@ X = np.random.rand(100, 5)
 y = np.random.randint(0, 2, 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-model = LogisticRegression()
+model = LogisticRegression(C=0.1, class_weight='balanced', solver='liblinear')
 model.fit(X_train, y_train)
 
 prediction = model.predict(X_test)      
@@ -46,8 +48,17 @@ metrics["logloss"] = logloss
 
 
 EXPERIMENT_NAME = "churn_polyakov"
-RUN_NAME = "model_0_registry"
 REGISTRY_MODEL_NAME = "churn_model_evgeniyPol"
+
+client = MlflowClient()
+try:
+    model_details = client.get_registered_model(REGISTRY_MODEL_NAME)
+    next_version = len(model_details.latest_versions) + 1 
+    next_version = max([int(v.version) for v in model_details.latest_versions]) + 1
+except:
+    next_version = 1
+
+RUN_NAME = f"model_registry_V{next_version}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
 os.environ["MLFLOW_S3_ENDPOINT_URL"] = "https://storage.yandexcloud.net"
 os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("AWS_ACCESS_KEY_ID") 
@@ -62,7 +73,7 @@ signature = infer_signature(X_test, prediction)
 input_example = X_test[:5]
 
 metadata = {
-    "model_type": "baseline",
+    "model_type": "tuned_logistic_regression",
     "data_version": "2025-07-17",
     "team": "mle_students"
 }
